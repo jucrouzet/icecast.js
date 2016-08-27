@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "target": "es5"
+  },
+  "files": [
+    "node_modules/typescript/lib/lib.es6.d.ts",
+    "typings/index.d.ts"
+  ]
+}

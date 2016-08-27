@@ -1,0 +1,26 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="node_modules/mocha/mocha.css"/>
+</head>
+<body>
+<div id="mocha"></div>
+<div id="testContainer"></div>
+<script src="node_modules/mocha/mocha.js"></script>
+<script src="node_modules/chai/chai.js"></script>
+<script>
+  mocha.ui('bdd');
+  expect = chai.expect;
+</script>
+<script src="test/resources/jquery-3.1.0.min.js"></script>
+<script src="coverage/instrumented.js"></script>
+<script>
+  declareIcecastTests();
+  if (window.mochaPhantomJS) {
+    mochaPhantomJS.run();
+  } else {
+    mocha.run();
+  }
+</script>
+</body>
+</html>

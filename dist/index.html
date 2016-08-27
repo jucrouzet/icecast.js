@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>Test page</title>
+</head>
+<body>
+
+  <div>
+    <input
+      type='url'
+      value='http://dir.xiph.org/listen/382260/listen.m3u'>
+    <button>Set stream URL</button>
+  </div>
+  <div>
+    <audio data-icecast preload="none" controls >
+      <source type="audio/x-mpegurl" src="http://icecast.juliencrouzet.fr/bfm.mp3.m3u" />
+      <source type="application/xspf+xml" src="http://icecast.juliencrouzet.fr/bfm.mp3.xspf" />
+      <source type="audio/x-vclt" src="http://icecast.juliencrouzet.fr/nrj.aac.vclt" />
+      <source type="audio/mpeg" src="http://icecast.juliencrouzet.fr/bfm.mp3" />
+      <source type="audio/aac" src="http://icecast.juliencrouzet.fr/nrj.aac" />
+      <!-- <source type="audio/x-scpls" src="http://213.186.61.62:8800/listen.pls" /> -->
+    </audio>
+  </div>
+  <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+  <script type='text/javascript'>
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+    (function (d, s, id) {
+      var js, ijs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {
+        return;
+      }
+      js = d.createElement(s);
+      js.id = id;
+      switch (getParameterByName('version')) {
+        case 'min' :
+          js.src = 'icecast.min.js';
+          break;
+        case 'normal' :
+          js.src = 'icecast.js';
+          break;
+        case 'debug' :
+        default :
+          js.src = 'icecast.debug.js';
+          break;
+      }
+      js.src += '?_=' + Math.random();
+      ijs.parentNode.insertBefore(js, ijs);
+    }(document, 'script', 'icecastjs'));
+    (function (d) {
+      var input = d.getElementsByTagName('input')[0];
+      var button = d.getElementsByTagName('button')[0];
+      var audio = d.getElementsByTagName('audio')[0];
+
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        audio.setAttribute("src", input.value);
+      });
+    }(document));
+  </script>
+</body>
+</html>
