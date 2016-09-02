@@ -8,7 +8,7 @@
     "start": "browserify src/main.ts -p tsify --debug -o dist/icecast.debug.js && watchify src/main.ts -p tsify --debug  -o dist/icecast.debug.js -v",
     "release": "browserify src/main.ts -p tsify --debug -o dist/icecast.$npm_package_version.js && browserify src/main.ts -p tsify -p [ minifyify --no-map ] -o dist/icecast.$npm_package_version.min.js",
     "pretest": "./pretest.sh",
-    "test": "mocha-phantomjs -k node_modules/mocha-phantomjs-istanbul TestRunner.html && remap-istanbul --input coverage/coverage.json --output coverage/html --exclude node_modules --type html",
+    "test": "mocha-phantomjs -k node_modules/mocha-phantomjs-istanbul TestRunner.html && remap-istanbul --input coverage/coverage.json --output coverage/html --exclude node_modules --type html && remap-istanbul --input coverage/coverage.json --output coverage/coverage.json --exclude node_modules --type json",
     "lint": "tslint -r node_modules/tslint-microsoft-contrib src/**/*.ts"
   },
   "repository": {
