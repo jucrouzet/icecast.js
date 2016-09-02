@@ -3,6 +3,7 @@ node_js:
   - "6"
 env:
   - CXX=g++-4.8
+  - PHANTOMJS_CDNURL=http://cnpmjs.org/downloads
 addons:
   apt:
     sources:

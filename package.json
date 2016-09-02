@@ -39,7 +39,7 @@
     "mocha-phantomjs": "3.6.0",
     "mocha-phantomjs-istanbul": "0.0.2",
     "mutationobserver-shim": "0.3.1",
-    "phantomjs": "1.9.7-15",
+    "phantomjs": "2.1.1",
     "remap-istanbul": "0.6.4",
     "tsify": "1.0.4",
     "tslint": "3.15.1",
