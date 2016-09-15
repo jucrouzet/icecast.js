@@ -1,15 +1,16 @@
 {
-  "dependencies": {
-    "bluebird": "registry:npm/bluebird#3.4.1+20160811213708"
-  },
+  "dependencies": {},
   "globalDependencies": {
+    "bluebird": "registry:dt/bluebird#3.0.0+20160907110115",
     "chai": "registry:dt/chai#3.4.0+20160601211834",
     "chai-as-promised": "registry:dt/chai-as-promised#0.0.0+20160423070304",
-    "jquery": "registry:dt/jquery#1.10.0+20160704162008",
-    "jsdom": "registry:dt/jsdom#2.0.0+20160316155526",
+    "jquery": "registry:dt/jquery#1.10.0+20160908203239",
+    "jsdom": "registry:dt/jsdom#2.0.0+20160906180921",
     "mocha": "registry:dt/mocha#2.2.5+20160720003353",
-    "node": "registry:dt/node#6.0.0+20160826120425",
+    "node": "registry:dt/node#6.0.0+20160915134512",
     "promises-a-plus": "registry:dt/promises-a-plus#0.0.0+20160317120654",
+    "q": "registry:dt/q#0.0.0+20160613154756",
+    "webdriverio": "registry:dt/webdriverio#4.0.4+20160724073345",
     "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160829180742",
     "whatwg-streams": "registry:dt/whatwg-streams#0.0.0+20160829180742"
   }

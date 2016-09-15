@@ -1,7 +1,8 @@
 import bluebird = require('bluebird');
 
+import DomHelper = require('../Utils/DomHelper');
 import Logger = require('../Utils/Logger');
-import Stream = require('./Stream');
+import Source = require('./Source');
 
 /**
  * Type for storage of registered players.
@@ -17,8 +18,14 @@ const registeredPlayers: InstancesStorage = {};
  * Type for source elements.
  */
 interface SourceElement {
+  /**
+   * Source's url.
+   */
   src: string;
-  mimeType: string;
+  /**
+   * Source's mimetype.
+   */
+  mimeType?: string;
 }
 
 /**
@@ -38,9 +45,9 @@ class Player {
    */
   private autoplay: boolean = false;
   /**
-   * Stream urls.
+   * Ready sources.
    */
-  // private urls: string[];
+  private sources: Source[];
 
   /**
    * Constructor.
@@ -48,6 +55,9 @@ class Player {
    * @param audio <audio> DOM element to initialize player on.
    */
   constructor(audio: HTMLAudioElement) {
+    if (!DomHelper.CheckValidAudioElement(true, audio)) {
+      throw new Error('Provided argument is not a valid audio element');
+    }
     if (audio.getAttribute('data-icecast-id')) {
       throw new Error('Audio element is already an Icecast.js instance');
     } else {
@@ -96,13 +106,16 @@ class Player {
     const urls: SourceElement[] = [];
 
     if (this.elem.getAttribute('src')) {
-      urls.push(<SourceElement>{ src: this.elem.getAttribute('src') });
+      urls.push(<SourceElement>{
+        src: this.elem.getAttribute('src'),
+        mimeType: this.elem.getAttribute('type') || undefined,
+      });
     }
     [].slice.call(this.elem.querySelectorAll('SOURCE'))
       .filter((elem: HTMLSourceElement) => (!!elem.getAttribute('icecast-src')))
       .forEach((source: HTMLSourceElement) => (urls.push(<SourceElement>{
         src: source.getAttribute('icecast-src'),
-        mimeType: source.getAttribute('mimeType') || undefined,
+        mimeType: source.getAttribute('type') || undefined,
       })));
     return urls;
   }
@@ -110,8 +123,10 @@ class Player {
    * Disable audio element while loading.
    */
   private disableAudio(): void {
-    this.elem.setAttribute('icecast-src', this.elem.getAttribute('src'));
-    this.elem.setAttribute('src', '');
+    if (this.elem.getAttribute('src')) {
+      this.elem.setAttribute('icecast-src', this.elem.getAttribute('src'));
+      this.elem.setAttribute('src', '');
+    }
     [].slice.call(this.elem.querySelectorAll('SOURCE'))
       .forEach((source: HTMLSourceElement) => {
         source.setAttribute('icecast-src', source.getAttribute('src'));
@@ -125,11 +140,11 @@ class Player {
   private load(): bluebird<void> {
     return bluebird.map(
       this.getSources(),
-      (url: SourceElement) => {
-        const stream: Stream = new Stream(url.src, url.mimeType);
+      (url: SourceElement): Promise<Source | void> => {
+        const source: Source = new Source(url.src, url.mimeType);
 
-        return stream.isValid()
-          .then((): Stream => stream)
+        return source.load()
+          .then((): Source => source)
           .catch((err: any): void => {
             Logger.Info(`Cannot play "${url.src}": ${err.message || err}`);
             return undefined;
@@ -137,13 +152,12 @@ class Player {
       },
       { concurrency: 5 }
     )
-      .then((results: any): Stream[] => results.filter(
-        (result: any): boolean => result && result.mimeType)
-      )
-      .then((results: Stream[]): void => {
-        /* tslint:disable: no-console */
-        console.log(results);
-        /* tslint:enable: no-console */
+      .then((results: any[]): Source[] => results.filter((result: any): boolean => !!result))
+      .then((results: Source[]): void => {
+        if (!results.length) {
+          throw new Error('No playable source defined for player');
+        }
+        this.sources = results;
       });
   }
 

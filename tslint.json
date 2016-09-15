@@ -54,7 +54,7 @@
     "no-angle-bracket-type-assertion": false,
     "no-any": false,
     "no-arg": true,
-    "no-backbone-get-set-outside-model": true,
+    "no-backbone-get-set-outside-model": false,
     "no-banned-terms": true,
     "no-bitwise": true,
     "no-conditional-assignment": false,
@@ -92,11 +92,7 @@
     "no-for-in-array": false,
     "no-function-constructor-with-string-args": true,
     "no-function-expression": true,
-    "no-http-string": [
-      true,
-      "http://www.example.com/?.*",
-      "http://www.examples.com/?.*"
-    ],
+    "no-http-string": false,
     "no-increment-decrement": true,
     "no-inferrable-types": false,
     "no-inner-html": true,

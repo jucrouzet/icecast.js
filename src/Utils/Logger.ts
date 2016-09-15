@@ -5,18 +5,18 @@ const methods: string[] = [
   'assert',
   'clear',
   'dir',
-  'Error',
+  'error',
   'group',
   'groupCollapsed',
   'groupEnd',
-  'Info',
+  'info',
   'log',
   'profile',
   'profileEnd',
   'table',
   'time',
   'timeEnd',
-  'Warn',
+  'warn',
 ];
 /**
  * Console object interface.

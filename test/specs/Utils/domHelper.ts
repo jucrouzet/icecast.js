@@ -1,9 +1,9 @@
 import Bluebird = require('bluebird');
 import events = require('events');
 
-import DomHelper = require('../../src/Utils/DomHelper');
+import DomHelper = require('../../../src/Utils/DomHelper');
 
-import pageManipulation = require('../utils/pageManipulation');
+import pageManipulation = require('../../utils/pageManipulation');
 
 
 

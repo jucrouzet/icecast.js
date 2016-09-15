@@ -73,4 +73,11 @@ export = {
     );
     return emitter;
   },
+  /**
+   * Checks if an element is valid for Player instanciation.
+   *
+   * @param acceptInstances Accept elements associated with Player instances.
+   * @param element         Element to check.
+   */
+  CheckValidAudioElement: (acceptInstances: boolean, element: HTMLElement): boolean => elementCheck(acceptInstances, element),
 };

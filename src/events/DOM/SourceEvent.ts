@@ -16,7 +16,7 @@ class SourceEvent extends Event {
   /**
    * Constructor.
    *
-   * @param name       Event name.
+   * @param name       Event title.
    * @param url        Stream url.
    * @param [mimeType] Stream mime mimeType.
    */
