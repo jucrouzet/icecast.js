@@ -1,4 +1,6 @@
-import {PlaylistStream} from './PlaylistStream';
+import {IPlaylistStream} from './PlaylistStream';
+
+import * as Promise from 'bluebird';
 
 /**
  * Playlist parsers base class.
@@ -11,7 +13,7 @@ export abstract class PlaylistParser {
   /**
    * Playlist's streams.
    */
-  protected streams: PlaylistStream[];
+  protected streams: IPlaylistStream[];
 
   /**
    * Constructor.
@@ -29,19 +31,19 @@ export abstract class PlaylistParser {
   /**
    * Get playlist streams.
    */
-  public getStreams(): PlaylistStream[] {
+  public getStreams(): IPlaylistStream[] {
     return this.streams;
   }
 
   /**
    * Parses playlist.
    */
-  public abstract parse(): Promise<PlaylistStream[]>;
+  public abstract parse(): Promise<IPlaylistStream[]>;
 
   /**
    * Generate a default stream with empty data for non EXTM3U streams.
    */
-  protected static CreateDefaultStream(): PlaylistStream {
+  protected static createDefaultStream(): IPlaylistStream {
     return {
       title    : '',
       duration : -1,

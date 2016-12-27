@@ -1,9 +1,9 @@
 dist/icecast.debug.js
 src/**/*.js
 src/**/*.js.map
-test/**/*.js
 test/**/*.js.map
-!test/resources/*.js
+
+tsconfig.json
 
 # Logs
 logs

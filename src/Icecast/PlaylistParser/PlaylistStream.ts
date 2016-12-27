@@ -1,8 +1,7 @@
-
 /**
  * Stream datas.
  */
-export interface PlaylistStream {
+export interface IPlaylistStream {
   streamUrl: string;
   score?: number;
   title?: string;

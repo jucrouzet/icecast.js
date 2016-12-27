@@ -1,94 +1,101 @@
 /**
- * Used console methods.
+ * Console object wrapper/configurator.
  */
-const methods: string[] = [
-  'assert',
-  'clear',
-  'dir',
-  'error',
-  'group',
-  'groupCollapsed',
-  'groupEnd',
-  'info',
-  'log',
-  'profile',
-  'profileEnd',
-  'table',
-  'time',
-  'timeEnd',
-  'warn',
-];
+
+const noop: Function = (): void => null;
+
+/**
+ * Console methods => min logging level.
+ */
+interface IMethodLevels {
+  [name: string]: number;
+}
+const methodLevels: IMethodLevels = {
+  assert        : 1,
+  dir           : 1,
+  debug         : 1,
+  error         : 4,
+  group         : 1,
+  groupCollapsed: 1,
+  groupEnd      : 1,
+  info          : 2,
+  log           : 1,
+  profile       : 1,
+  profileEnd    : 1,
+  table         : 1,
+  time          : 1,
+  timeEnd       : 1,
+  warn          : 3,
+};
 /**
  * Console object interface.
  */
-interface ConsoleObject {
-  assert: Function;
-  clear: Function;
-  dir: Function;
-  error: Function;
-  group: Function;
+interface IConsoleObject {
+  assert        : Function;
+  clear         : Function;
+  dir           : Function;
+  debug         : Function;
+  error         : Function;
+  group         : Function;
   groupCollapsed: Function;
-  groupEnd: Function;
-  info: Function;
-  log: Function;
-  profile: Function;
-  profileEnd: Function;
-  table: Function;
-  time: Function;
-  timeEnd: Function;
-  warn: Function;
+  groupEnd      : Function;
+  info          : Function;
+  log           : Function;
+  profile       : Function;
+  profileEnd    : Function;
+  table         : Function;
+  time          : Function;
+  timeEnd       : Function;
+  warn          : Function;
 }
 /**
  * Empty (noop) console object if not available.
  */
-class EmptyConsole implements ConsoleObject {
-  public assert() { /* noop */  }
-  public clear() { /* noop */  }
-  public dir() { /* noop */  }
-  public error() { /* noop */  }
-  public group() { /* noop */  }
-  public groupCollapsed() { /* noop */  }
-  public groupEnd() { /* noop */  }
-  public info() { /* noop */  }
-  public log() { /* noop */  }
-  public profile() { /* noop */  }
-  public profileEnd() { /* noop */  }
-  public table() { /* noop */  }
-  public time() { /* noop */  }
-  public timeEnd() { /* noop */  }
-  public warn() { /* noop */  }
-}
+const emptyConsole: IConsoleObject = {
+  assert        : noop,
+  clear         : noop,
+  dir           : noop,
+  debug         : noop,
+  error         : noop,
+  group         : noop,
+  groupCollapsed: noop,
+  groupEnd      : noop,
+  info          : noop,
+  log           : noop,
+  profile       : noop,
+  profileEnd    : noop,
+  table         : noop,
+  time          : noop,
+  timeEnd       : noop,
+  warn          : noop,
+};
 
 /**
  * Logger object.
  */
-/* tslint:disable: no-stateless-class */
-class Logger {
-  /**
-   * Log currentLevel : Trace.
-   */
-  public static TRACE: number = 1;
+/* tslint:disable: no-stateless-class no-any function-name */
+export class Logger {
   /**
    * Log currentLevel : Debug.
    */
-  public static DEBUG: number = 2;
+  public static DEBUG: number = 1;
   /**
    * Log currentLevel : Info.
    */
-  public static INFO: number = 3;
+  public static INFO: number = 2;
   /**
    * Log currentLevel : warning.
    */
-  public static WARNING: number = 4;
+  public static WARNING: number = 3;
   /**
    * Log currentLevel : Error.
    */
-  public static ERROR: number = 5;
+  public static ERROR: number = 4;
 
   /**
    * Console object.
    */
-  private static console: ConsoleObject;
+  private static consoleObject: IConsoleObject = emptyConsole;
   /**
    * Current logging currentLevel.
    */
@@ -107,111 +114,46 @@ class Logger {
    * @param level Logging currentLevel (see Logger.* properties).
    */
   public static set level(level: number) {
-    if ((level < Logger.TRACE) || (level > Logger.ERROR)) {
+    if ((level < Logger.DEBUG) || (level > Logger.ERROR)) {
       throw new Error('Invalid log currentLevel');
     }
     Logger.currentLevel = Math.floor(level);
+    Logger.setupConsole();
   }
+
   /**
    * Get logging currentLevel.
    */
   public static get level(): number {
     return Logger.currentLevel;
   }
-  /**
-   * Trace Debug something.
-   *
-   * @param things Things to Trace Debug.
-   */
-  public static Trace(...things: any[]) {
-    Logger.log(Logger.TRACE, things);
-  }
-  /**
-   * Debug something.
-   *
-   * @param things Things to Debug.
-   */
-  public static Debug(...things: any[]) {
-    Logger.log(Logger.DEBUG, things);
-  }
-  /**
-   * Informs user about something.
-   *
-   * @param things Things to inform about.
-   */
-  public static Info(...things: any[]) {
-    Logger.log(Logger.INFO, things);
-  }
-  /**
-   * Warns user about something.
-   *
-   * @param things Things to Warn about.
-   */
-  public static Warn(...things: any[]) {
-    Logger.log(Logger.WARNING, things);
-  }
-  /**
-   * Shows a fatal Error to user.
-   *
-   * @param things Fatal Error(s).
-   */
-  public static Error(...things: any[]) {
-    Logger.log(Logger.ERROR, things);
-  }
 
   /**
-   * Log routine.
-   *
-   * @param level  Log currentLevel.
-   * @param things Things to Debug.
-   *
-   * @return Nothing.
+   * Get the console object.
    */
-  private static log(level: number, things: any[]) {
-    let logMethod: Function;
-
-    if (!Logger.console) {
-      Logger.setupConsole();
-    }
-    if (level < Logger.currentLevel) {
-      return;
-    }
-    switch (level) {
-      case 5:
-        logMethod = Logger.console.error;
-        break;
-      case 4:
-        logMethod = Logger.console.warn;
-        break;
-      case 3:
-        logMethod = Logger.console.info;
-        break;
-      default:
-        logMethod = Logger.console.log;
-        break;
-    }
-    Logger.console.group('[ICECAST.JS]');
-    logMethod.apply(null, things);
-    Logger.console.groupEnd();
+  public static get send(): IConsoleObject {
+    return Logger.consoleObject;
   }
+
   /**
    * Setups console object with browsers capabilities.
    */
   private static setupConsole() {
-    Logger.console = new EmptyConsole();
+    Logger.consoleObject = emptyConsole;
     if (!window.console) {
-      return ;
+      return;
     } else {
-      for (const methodName of methods) {
-        if (typeof (<any>window.console)[methodName] === 'function') {
-          (<any>Logger.console)[methodName] = (<any>window.console)[methodName].bind(window.console);
-        } else {
-          (<any>Logger.console)[methodName] = () => { /* */ };
+      Object.keys(methodLevels).forEach((method: string): void => {
+        if (
+          (methodLevels[method] >= Logger.level) &&
+          (typeof (<any>window.console)[method] === 'function')
+        ) {
+          (<any>Logger.consoleObject)[method] =
+            (<any>window.console)[method].bind(window.console);
         }
-      }
+      });
+      Logger.consoleObject.debug = Logger.consoleObject.log;
     }
   }
 }
-/* tslint:enable: no-stateless-class */
-
-export = Logger;
+/* tslint:enable: no-stateless-class no-any function-name */

@@ -1,23 +1,20 @@
-import {PlaylistParser} from './PlaylistParser/PlaylistParser';
-import {PlaylistStream} from './PlaylistParser/PlaylistStream';
+import { Logger } from '../Utils/Logger';
+import { M3U } from './PlaylistParser/M3U';
+import { PlaylistParser } from './PlaylistParser/PlaylistParser';
+import { IPlaylistStream } from './PlaylistParser/PlaylistStream';
+import { XSPF } from './PlaylistParser/XSPF';
 
-
-import Path = require('path');
-import Url = require('url');
-import bufferLib = require('buffer');
-import Bluebird = require('bluebird');
-
-import Logger = require('../Utils/Logger');
-import M3U = require('./PlaylistParser/M3U');
-import XSPF = require('./PlaylistParser/XSPF');
+import * as Promise from 'bluebird';
+import * as bufferLib from 'buffer';
+import * as Path from 'path';
+import * as Url from 'url';
 
 const nodeBuffer = bufferLib.Buffer;
-
 
 /**
  * Streams and playlists handling.
  */
-class Source {
+export class Source {
   /**
    * Source url.
    */
@@ -25,7 +22,7 @@ class Source {
   /**
    * Audio streams.
    */
-  private streams: PlaylistStream[];
+  private streams: IPlaylistStream[];
   /**
    * Playlist file mimetype.
    */
@@ -49,6 +46,9 @@ class Source {
   constructor(url: string, mimeType?: string) {
     const parts: string[] | void = mimeType && mimeType.split(/\s*;/);
 
+    if (!url) {
+      throw new Error('Missing url');
+    }
     this.url = url;
     if (
       parts &&
@@ -69,17 +69,19 @@ class Source {
   /**
    * Parse source (playlist or stream).
    */
-  public load(): Bluebird<void> {
-    let promise: Bluebird<any> = Bluebird.resolve();
+  /* tslint:disable: no-any */
+  public load(): Promise<any> {
+    let promise: Promise<any> = Promise.resolve();
+    /* tslint:disable: no-any */
     const audio = new Audio();
 
     if (this.playlistMimeType && (Source.playlistTypes.indexOf(this.playlistMimeType) !== -1)) {
-      promise = Bluebird.resolve(this.parsePlaylist())
+      promise = Promise.resolve(this.parsePlaylist())
         .timeout(1000)
-        .then((streams: PlaylistStream[]): PlaylistStream[] => {
-          let parsedStreams: PlaylistStream[];
+        .then((streams: IPlaylistStream[]): IPlaylistStream[] => {
+          let parsedStreams: IPlaylistStream[];
 
-          streams.forEach((stream: PlaylistStream) => {
+          streams.forEach((stream: IPlaylistStream) => {
             if (stream.mimeType) {
               switch (audio.canPlayType(stream.mimeType)) {
                 case 'probably':
@@ -95,18 +97,18 @@ class Source {
               stream.score = 0.7;
             }
           });
-          parsedStreams = streams.filter((stream: PlaylistStream) => (stream.score > 0));
+          parsedStreams = streams.filter((stream: IPlaylistStream) => (stream.score > 0));
           if (!parsedStreams.length) {
             throw new Error('No playable stream found in playlist');
           }
           return parsedStreams;
         });
     }
-    return promise.then((streams: (PlaylistStream[] | void)): PlaylistStream[] => {
+    return promise.then((streams: (IPlaylistStream[] | void)): IPlaylistStream[] => {
       if (streams) {
-        return (<PlaylistStream[]>streams);
+        return (<IPlaylistStream[]>streams);
       }
-      const builtStream: PlaylistStream = (<PlaylistStream>{ streamUrl: this.url });
+      const builtStream: IPlaylistStream = (<IPlaylistStream>{ streamUrl: this.url });
 
       if (this.mimeType) {
         switch (audio.canPlayType(this.mimeType)) {
@@ -121,20 +123,20 @@ class Source {
         }
         builtStream.mimeType = this.mimeType;
       } else {
-        Logger.Info(
+        Logger.send.info(
           `${this.url} will be considered as an audio stream as no ` +
-          ' type attribute has been set and type cannot be guessed from extension'
+          ' type attribute has been set and type cannot be guessed from extension',
         );
         builtStream.score = 0.1;
       }
       return [builtStream];
     })
-      .then((streams: PlaylistStream[]): void => {
-        this.streams = streams.sort((a: PlaylistStream, b: PlaylistStream): number => {
+      .then((streams: IPlaylistStream[]): void => {
+        this.streams = streams.sort((a: IPlaylistStream, b: IPlaylistStream): number => {
           return ((a.score || 0) - (b.score || 0));
         });
       })
-      .catch(Bluebird.TimeoutError, () => {
+      .catch(Promise.TimeoutError, () => {
         throw new Error('Timeout while fetching playlist');
       });
   }
@@ -147,16 +149,15 @@ class Source {
   /**
    * Get source's streams.
    */
-  public getStreams(): PlaylistStream[] {
+  public getStreams(): IPlaylistStream[] {
     return this.streams;
   }
 
   /**
    * Parses stream's playlist file.
    */
-  private parsePlaylist(): Promise<PlaylistStream[]> {
-
-    return window.fetch(
+  private parsePlaylist(): Promise<IPlaylistStream[]> {
+    return Promise.resolve(window.fetch(
       this.url,
       {
         method: 'GET',
@@ -164,13 +165,13 @@ class Source {
         credentials: 'omit',
         cache: 'no-cache',
         referrer: window.document && window.document.location && window.document.location.href,
-      }
-    )
-      .then((response: Response): Promise<PlaylistStream[]> => {
+      },
+    ))
+      .then((response: Response): Promise<IPlaylistStream[]> => {
         let parser: PlaylistParser;
 
-        return response.arrayBuffer()
-          .then((body: ArrayBuffer): Promise<PlaylistStream[]> => {
+        return Promise.resolve(response.arrayBuffer())
+          .then((body: ArrayBuffer): Promise<IPlaylistStream[]> => {
             const buffer: Buffer = nodeBuffer.from(body);
             const text: string =  buffer.toString('utf-8');
 
@@ -199,13 +200,9 @@ class Source {
    */
   private static guessMimeTypeByExtension(givenUrl: string): string {
     let mime: string = '';
-
-    if (!givenUrl) {
-      return mime;
-    }
     const urlObj = Url.parse(givenUrl);
 
-    if (!urlObj || !urlObj.pathname) {
+    if (!urlObj.pathname) {
       return mime;
     }
     switch (Path.extname(urlObj.pathname).toLowerCase()) {
@@ -228,12 +225,10 @@ class Source {
       default:
         return mime;
     }
-    Logger.Debug(
+    Logger.send.debug(
       `Guessed that ${givenUrl} is a ${mime}, that may be wrong,` +
-      'you should add a type attribute if it\'s from an audio/source tag'
+      'you should add a type attribute if it\'s from an audio/source tag',
     );
     return mime;
   }
 }
-
-export = Source;

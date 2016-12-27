@@ -5,10 +5,14 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
     "target": "es5"
   },
-  "files": [
-    "node_modules/typescript/lib/lib.es6.d.ts",
-    "typings/index.d.ts"
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "include": [
+    "src/**/*.ts"
   ]
 }

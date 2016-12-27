@@ -1,13 +1,14 @@
-import {PlaylistParser} from './PlaylistParser';
-import {PlaylistStream} from './PlaylistStream';
+import { Logger } from '../../Utils/Logger';
+import { camelize } from '../../Utils/Various';
+import { PlaylistParser } from './PlaylistParser';
+import { IPlaylistStream } from './PlaylistStream';
 
-import Logger = require('../../Utils/Logger');
-import Utils = require('../../Utils/Various');
+import * as Promise from 'bluebird';
 
 /**
  * XSPF files parser.
  */
-class XSPF extends PlaylistParser {
+export class XSPF extends PlaylistParser {
   /**
    * Constructor.
    *
@@ -22,8 +23,8 @@ class XSPF extends PlaylistParser {
    *
    * @return A promise resolved when parsing is done.
    */
-  public parse(): Promise<PlaylistStream[]> {
-    return new Promise((resolve: Function, reject: Function): void => {
+  public parse(): Promise<IPlaylistStream[]> {
+    return new Promise<IPlaylistStream[]>((resolve: Function, reject: Function): void => {
       const parser: DOMParser = new DOMParser();
       const doc: Document = parser.parseFromString(this.content, 'application/xml');
 
@@ -43,9 +44,9 @@ class XSPF extends PlaylistParser {
    *
    * @param doc Parsed playlist document.
    */
-  private parsePlaylist(doc: Document): PlaylistStream[] {
+  private parsePlaylist(doc: Document): IPlaylistStream[] {
     const playlists: NodeList = doc.getElementsByTagName('playlist');
-    let streams: PlaylistStream[] = [];
+    let streams: IPlaylistStream[] = [];
 
     [].slice.call(playlists).forEach((playlist: Element): void => {
       let trackList: Element;
@@ -63,7 +64,7 @@ class XSPF extends PlaylistParser {
         streams = streams.concat(this.parseTrackList(trackList, defaultTitle));
       }
     });
-    Logger.Debug(streams);
+    Logger.send.debug(streams);
     return streams;
   }
   /**
@@ -72,14 +73,16 @@ class XSPF extends PlaylistParser {
    * @param trackList    <trackList> to parse.
    * @param defaultTitle Default stream title.
    */
-  private parseTrackList(trackList: Element, defaultTitle: string): PlaylistStream[] {
-    const streams: PlaylistStream[] = [];
+  private parseTrackList(trackList: Element, defaultTitle: string): IPlaylistStream[] {
+    const streams: IPlaylistStream[] = [];
 
     [].slice.call(trackList.getElementsByTagName('track')).forEach((track: Element): void => {
-      const stream: PlaylistStream = PlaylistParser.CreateDefaultStream();
+      const stream: IPlaylistStream = PlaylistParser.createDefaultStream();
       let url: string = '';
       let title: string = defaultTitle;
+      /* tslint:disable: no-any */
       let metas: any = {};
+      /* tslint:enable: no-any */
       let description: string = '';
       let duration: number = -1;
 
@@ -91,7 +94,7 @@ class XSPF extends PlaylistParser {
           const value = child.textContent.trim().toLocaleLowerCase();
 
           if (!value.match(/^https?:\/\//i)) {
-            Logger.Debug(`Ignoring non http-stream : ${value}`);
+            Logger.send.log(`Ignoring non http-stream : ${value}`);
             return;
           }
           url = value;
@@ -109,7 +112,7 @@ class XSPF extends PlaylistParser {
         }
       });
       if (!url) {
-        Logger.Debug('Skipping streamless track : ', track);
+        Logger.send.log('Skipping streamless track : ', track);
         return;
       }
       stream.title = title;
@@ -135,18 +138,18 @@ class XSPF extends PlaylistParser {
    *
    * @param content Tag content.
    */
+  /* tslint:disable: no-any */
   private extractMetasFromAnnotation(content: string): any {
     const metas: any = {};
+    /* tslint:enable: no-any */
 
     content.split(/[\r\n]+/).forEach((line: string): void => {
       if (line.indexOf(':') !== -1) {
         const parts = line.split(':');
 
-        metas[Utils.Camelize(parts[0].trim())] = parts.slice(1).join(':').trim();
+        metas[camelize(parts[0].trim())] = parts.slice(1).join(':').trim();
       }
     });
     return metas;
   }
 }
-
-export = XSPF;

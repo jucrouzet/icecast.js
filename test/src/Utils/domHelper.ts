@@ -11,12 +11,12 @@ import pageManipulation = require('../../utils/pageManipulation');
 const domHelper = (expect: Chai.ExpectStatic, $: JQueryStatic): void => {
   describe('DomHelper', (): void => {
 
-    describe('GetAudioElements', (): void => {
+    describe('getAudioElements', (): void => {
       it('Should detect audio elements', (): any => {
         return expect(
           pageManipulation.replaceContentWith('DomHelper.1.html').then(() : void => {
             const expected = $('[data-test="true"]');
-            let result = DomHelper.GetAudioElements();
+            let result = DomHelper.getAudioElements();
 
             expected.each((i: number, elem: HTMLElement): void => {
               if (!result.filter(
@@ -34,7 +34,7 @@ const domHelper = (expect: Chai.ExpectStatic, $: JQueryStatic): void => {
       });
     });
 
-    describe('WatchAudioElements', (): void => {
+    describe('watchAudioElements', (): void => {
       it('Should emit an added event when adding valid and non associated with Player audio tags', (): any => {
         let countValid: number = 0;
 
@@ -42,7 +42,7 @@ const domHelper = (expect: Chai.ExpectStatic, $: JQueryStatic): void => {
           pageManipulation
             .replaceContentWith('DomHelper.1.html')
             .then(() : Bluebird<{}> => new Bluebird((resolve: Function, reject: Function) => {
-              const watcher: events.EventEmitter = DomHelper.WatchAudioElements();
+              const watcher: events.EventEmitter = DomHelper.watchAudioElements();
 
               watcher
               .on('added', (audio: HTMLAudioElement): void => {
@@ -73,7 +73,7 @@ const domHelper = (expect: Chai.ExpectStatic, $: JQueryStatic): void => {
           pageManipulation
             .replaceContentWith('DomHelper.3.html')
             .then(() : Bluebird<{}> => new Bluebird((resolve: Function, reject: Function) => {
-              const watcher: events.EventEmitter = DomHelper.WatchAudioElements();
+              const watcher: events.EventEmitter = DomHelper.watchAudioElements();
 
               watcher
               .on('removed', (audio: HTMLAudioElement): void => {

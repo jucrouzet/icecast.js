@@ -1,11 +1,13 @@
-import {PlaylistParser} from './PlaylistParser';
-import {PlaylistStream} from './PlaylistStream';
-import Logger = require('../../Utils/Logger');
+import { Logger } from '../../Utils/Logger';
+import { PlaylistParser } from './PlaylistParser';
+import { IPlaylistStream } from './PlaylistStream';
+
+import * as Promise from 'bluebird';
 
 /**
  * M3U(8) files parser.
  */
-class M3U extends PlaylistParser {
+export class M3U extends PlaylistParser {
   /**
    * Constructor.
    *
@@ -20,12 +22,11 @@ class M3U extends PlaylistParser {
    *
    * @return A promise resolved when parsing is done.
    */
-  public parse(): Promise<PlaylistStream[]> {
-    return new Promise((resolve: Function, reject: Function): void => {
-      let currentStream: PlaylistStream;
+  public parse(): Promise<IPlaylistStream[]> {
+    return new Promise<IPlaylistStream[]>((resolve: Function, reject: Function): void => {
+      let currentStream: IPlaylistStream;
       const lines: string[] = this.content.split(/[\r\n]+/);
       const extInfRegex: RegExp = /^\s*#EXTINF\s*:\s*(\-?\d+)(.*),(.*)$/i;
-
 
       lines.forEach((rawLine: string): void => {
         const line = rawLine.trim();
@@ -40,10 +41,10 @@ class M3U extends PlaylistParser {
           return;
         }
         if (!line.match(/^https?:\/\//i)) {
-          Logger.Debug(`Ignoring stream "${line}" (not http(s))`);
+          Logger.send.debug(`Ignoring stream "${line}" (not http(s))`);
         }
         if (!currentStream) {
-         PlaylistParser.CreateDefaultStream();
+         PlaylistParser.createDefaultStream();
         }
         currentStream.streamUrl = line;
         this.streams.push(currentStream);
@@ -63,11 +64,11 @@ class M3U extends PlaylistParser {
    * @param parsedDuration Stream duration.
    * @param parsedMetas    Stream metadatas.
    */
-  private parseInfos(parsedTitle: string, parsedDuration: string, parsedMetas: string): PlaylistStream {
+  private parseInfos(parsedTitle: string, parsedDuration: string, parsedMetas: string): IPlaylistStream {
     const duration: number = parseInt(parsedDuration, 10);
     const metas: {} = {};
     const fakeDiv = window.document.createElement('div');
-    const infos: PlaylistStream = PlaylistParser.CreateDefaultStream();
+    const infos: IPlaylistStream = PlaylistParser.createDefaultStream();
 
     infos.title = parsedTitle || '';
     infos.duration = ((duration < -1) ? -1 : duration);
@@ -78,11 +79,11 @@ class M3U extends PlaylistParser {
     /* tslint:enable: no-inner-html */
     [].slice.call(fakeDiv.firstChild.attributes).forEach(
       (attribute: Attr): void => {
+        /* tslint:disable: no-any */
         (<any>metas)[attribute.name] = attribute.value;
-      }
+        /* tslint:enable: no-any */
+      },
     );
     return infos;
   }
 }
-
-export = M3U;

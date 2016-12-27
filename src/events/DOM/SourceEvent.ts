@@ -3,7 +3,7 @@
  *
  * @class
  */
-class SourceEvent extends Event {
+export class SourceEvent extends Event {
   /**
    * Stream's url.
    */
@@ -29,5 +29,3 @@ class SourceEvent extends Event {
     this.mimeType = mimeType;
   }
 }
-
-export = SourceEvent;

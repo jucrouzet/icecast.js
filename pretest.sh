@@ -7,33 +7,27 @@ if [ ! -d coverage ]; then
   echo "* Creating coverage directory";
   mkdir coverage;
 else
-  echo "* Coverage directory exists";
+  echo "Coverage directory exists !";
+  exit 1;
 fi
 
-NEWTS=0;
+echo "* Checking specs sources presence/freshness";
+# (Re)compile spec sources
+for specSource in `find test/specs -type f -name '*.spec.ts'`; do
+  if [ ! -f `dirname $specSource`/`basename $specSource .ts`.js ] || [ "$specSource" -nt `dirname $specSource`/`basename $specSource .ts`.js ] ; then
+    echo "  - Compiling $specSource";
+    ./node_modules/.bin/browserify $specSource -p tsify -o `dirname $specSource`/`basename $specSource .ts`.js;
+  fi;
+done;
 
-if [ ! -f test/index.js ]; then
-  NEWTS=1;
-  echo "* test/index.js is not present, regenerating it";
-else
-  for tsSource in `find test -type f -name '*.ts'`; do
-    if [ "$tsSource" -nt test/index.js ]; then
-      echo "* $tsSource is newer than test/index.js, regenerating it";
-      NEWTS=1;
-      break;
-    fi;
-  done;
-fi;
-if [ $NEWTS -eq 0 ]; then
-  echo "* test/index.js is up to date";
-else
-  browserify test/index.ts --debug -p tsify -o test/index.js;
-fi;
-
-
-if [ ! -f coverage/instrumented.js ] || [ test/index.js -nt ./coverage/instrumented.js ]; then
-  echo "* Generating Istanbul instruments";
-  ./node_modules/.bin/istanbul instrument -x \"node_modules/**\"  -i test/index.js -o ./coverage/instrumented.js;
-else
-  echo "* Istanbul instruments are up to date";
-fi;
+echo "* Checking browser sources presence/freshness";
+# (Re)compile browser sources
+for specSource in `find test/specs -type f -name '*.browser.ts'`; do
+  if [ ! -f `dirname $specSource`/`basename $specSource .ts`.js ] || [ "$specSource" -nt `dirname $specSource`/`basename $specSource .ts`.js ] ; then
+    echo "  - Compiling $specSource";
+    RAW=`dirname $specSource`/`basename $specSource .ts`.raw.js;
+    INSTRUMENTED=`dirname $specSource`/`basename $specSource .ts`.js;
+    ./node_modules/.bin/browserify $specSource -p tsify --debug -o $RAW;
+    ./node_modules/.bin/istanbul instrument -x \"node_modules/**\" -i $RAW -o $INSTRUMENTED;
+  fi;
+done;

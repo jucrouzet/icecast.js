@@ -1,16 +1,11 @@
 module.exports = function (grunt) {
   'use strict';
 
+  const path = require('path');
   const pjson = require('./package.json');
   const vendorFile = `dist/icecast${pjson.version ? `.${pjson.version}` : ''}.min.js`;
   const debugFile = `dist/icecast${pjson.version ? `.${pjson.version}` : ''}.js`;
-  const testsEnv= {};
-
-
-  if (grunt.option('only') && (grunt.option('only').length)) {
-    testsEnv['TEST_ONLY'] = grunt.option('only');
-  }
-
+  let testServerPort;
 
   grunt.initConfig({
     browserify: {
@@ -71,7 +66,7 @@ module.exports = function (grunt) {
                   grunt: true,
                   args: ['tslint']
                 },
-                (tslintError, result, code)  => {
+                (tslintError, result, code) => {
                   if (code) {
                     grunt.log.error(result.stdout);
                   } else {
@@ -133,31 +128,57 @@ module.exports = function (grunt) {
           async: false,
         },
       },
+      report: {
+        command: './node_modules/.bin/istanbul report',
+        options: {
+          async: false,
+        },
+      },
     },
     wait: {
       selenium: {
         options: {
-          delay: 5000,
-          before : function(options) {
-            grunt.log.writeln('Giving Selenium 5s to start');
+          delay: 3000,
+          before: function (options) {
+            grunt.log.writeln('Giving Selenium 3s to start');
           },
         },
-      }
+      },
     },
-    env: {
-      test: testsEnv,
+    connect: {
+      test: {
+        options: {
+          base: path.join(__dirname, 'test'),
+          port: 8000,
+          useAvailablePort: true,
+          hostname: '*',
+          onCreateServer: function (server) {
+            server.on('listening', () => {
+              const address = server.address();
+
+              if (!address || !address.port) {
+                grunt.log.error('The test webserver could not start');
+                throw new Error();
+              }
+              process.env['CONNECT_PORT'] = address.port;
+            });
+          },
+        },
+      },
+    },
+    clean: {
+      coverage: ['coverage'],
     },
   });
 
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-tslint');
-  grunt.loadNpmTasks('grunt-webdriver');
-  grunt.loadNpmTasks('grunt-shell-spawn');
   grunt.loadNpmTasks('grunt-continue');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-shell-spawn');
+  grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-wait');
-  grunt.loadNpmTasks('grunt-env');
-
-
+  grunt.loadNpmTasks('grunt-webdriver');
 
   grunt.registerTask('default', [
     'tslint',
@@ -168,17 +189,19 @@ module.exports = function (grunt) {
     'browserify:watch'
   ]);
   grunt.registerTask('test', [
+    'clean:coverage',
     'shell:pretest',
     'shell:checkXvfb',
     'shell:seleniumInstall',
     'shell:seleniumStart',
-    'env:test',
+    'connect:test',
     'continue:on',
     'wait:selenium',
-    'webdriver',
+    'webdriver:test',
     'continue:off',
     'shell:seleniumStart:kill',
     'continue:fail-on-warning',
+    'shell:report',
   ]);
 
 };

@@ -1,21 +1,22 @@
-import DomHelper = require('./Utils/DomHelper');
-import Player = require('./Icecast/Player');
-import Logger = require('./Utils/Logger');
+import { Player } from './Icecast/Player';
+import * as DomHelper from './Utils/DomHelper';
+import { Logger } from './Utils/Logger';
 
-Logger.level = Logger.TRACE;
+Logger.level = Logger.DEBUG;
 
-/* tslint:disable: no-var-requires */
+/* tslint:disable */
 require('mutationobserver-shim');
-/* tslint:enable: no-var-requires */
+require('core-js');
+/* tslint:enable */
 
 /**
  * Init present audio players.
  */
 /* tslint:disable: no-unused-new */
-for (const audio of DomHelper.GetAudioElements()) {
-  try { new Player(audio); } catch (err) { Logger.Error(err); }
+for (const audio of DomHelper.getAudioElements()) {
+  try { new Player(audio); } catch (err) { Logger.send.error(err); }
 }
-DomHelper.WatchAudioElements().on('added', (audio: HTMLAudioElement) => {
-  try { new Player(audio); } catch (err) { Logger.Error(err); }
+DomHelper.watchAudioElements().on('added', (audio: HTMLAudioElement) => {
+  try { new Player(audio); } catch (err) { Logger.send.error(err); }
 });
 /* tslint:enable: no-unused-new */
