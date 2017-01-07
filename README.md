@@ -1,3 +1,7 @@
+
+# :warning: THIS IS PROJECT IS A WIP, NO RELEASE YET !
+
+
 [![Build Status](https://travis-ci.org/jucrouzet/icecast.js.svg?branch=master)](https://travis-ci.org/jucrouzet/icecast.js) [![codecov](https://codecov.io/gh/jucrouzet/icecast.js/branch/master/graph/badge.svg)](https://codecov.io/gh/jucrouzet/icecast.js)
 
 [http://www.juliencrouzet.fr/icecast.js/](http://www.juliencrouzet.fr/icecast.js/)
