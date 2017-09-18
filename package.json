@@ -1,13 +1,13 @@
 {
   "name": "icecast.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Pure JavaScript Icecast-based Webradio player.",
   "main": "./dist/icecast.js",
   "repository": "git@github.com:jucrouzet/icecast.js.git",
   "author": "Julien CROUZET <contact@juliencrouzet.fr>",
   "license": "MIT",
   "scripts": {
-    "postversion": "rm ./dist/icecast.js && ln -sf ./dist/icecast.$npm_package_version.js ./dist/icecast.js",
+    "postversion": "rm ./dist/icecast.js && ln -sf icecast.$npm_package_version.js ./dist/icecast.js",
     "dist": "webpack --config ./webpack/lib.js",
     "dist-min": "NODE_ENV=production webpack --config ./webpack/lib.js",
     "watch": "./node_modules/.bin/webpack-dev-server --content-base ./dist --inline --hot",
