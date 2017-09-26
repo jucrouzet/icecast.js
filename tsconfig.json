@@ -1,14 +1,27 @@
 {
+  "compileOnSave": false,
+  "buildOnSave": false,
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "experimentalDecorators": true,
+    "lib": ["es6", "dom", "dom.iterable", "webworker"],
     "module": "commonjs",
     "noImplicitAny": true,
-    "removeComments": true,
+    "outDir": "definition",
     "preserveConstEnums": true,
+    "removeComments": true,
+    "skipLibCheck": true,
     "sourceMap": true,
+    "strictNullChecks": true,
+    "strict": true,
     "target": "es5"
   },
-  "files": [
-    "node_modules/typescript/lib/lib.es6.d.ts",
-    "typings/index.d.ts"
+  "include": [
+    "src/index.ts",
+    "src/workers/*.ts",
+    "src/features/*.ts",
+    "src/declaration.d.ts",
+    "node_modules/@types/webpack-env/index.d.ts"
   ]
 }

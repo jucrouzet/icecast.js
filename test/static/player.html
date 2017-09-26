@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test page</title>
+</head>
+<body>
+  <div id="mocha"></div>
+  <audio id="player1" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player2" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player3" controls preload="none" class="icecast.js icecastjs-player" src="http://example.com" ></audio>
+
+  <audio id="player4" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+
+  <!-- This stream may be down at some time, failing tests ... -->
+  <audio id="player5" controls preload="auto" autoplay class="icecast.js" src="http://66.85.88.174:2001/" ></audio>
+  <!-- / -->
+
+  <audio id="player6" controls preload="none" autoplay class="icecast.js" src="http://example.com"></audio>
+  <audio id="player7" controls preload="metadata" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player8" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player9" controls preload="none" icecast-autoplay class="icecast.js" src="http://example.com"></audio>
+  <audio id="player10" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player11" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player12" controls preload="none" class="icecast.js" src="http://example.com"></audio>
+  <audio id="player13" controls preload="none" class="icecast.js">
+    <source src="http://example.com/1" />
+    <source src="http://example.com/2" />
+  </audio>
+  <audio id="player14" controls preload="none" src="http://example.com/1" class="icecast.js">
+    <source src="http://example.com/2" />
+    <source src="http://example.com/3" />
+    <source  />
+  </audio>
+  <audio id="player15" controls preload="none" src="http://example.com" class="icecast.js"></audio>
+  <audio id="player16" controls preload="none" src="http://example.com" class="icecast.js"></audio>
+
+
+  <div id="notPlayer"></div>
+  <script src="/test/static/scripts/player.js"></script>
+</body>
+</html>

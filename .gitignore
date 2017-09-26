@@ -1,3 +1,6 @@
+.tmp
+dist
+test/**/*.js
 
 # Logs
 logs
