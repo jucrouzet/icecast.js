@@ -29,7 +29,7 @@ module.exports = [
     devServer,
     entry: path.resolve('src', 'index.ts'),
     output: {
-      filename: `icecast.${base.generatedFileSuffix}.js`,
+      filename: `icecast.js`,
       library: 'icecast.js',
       libraryTarget: 'umd',
       path: path.resolve('dist'),

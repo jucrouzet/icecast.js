@@ -1,6 +1,7 @@
 .tmp
 dist
 test/**/*.js
+test/**/*.map
 
 # Logs
 logs

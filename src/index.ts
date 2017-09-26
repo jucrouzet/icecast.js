@@ -51,7 +51,9 @@ function bootstrap(): void {
             !== -1
           )
         ) {
-          (new Player(<HTMLAudioElement>node).init()); //tslint:disable-line: no-unused-expression
+          const player: Player = new Player(<HTMLAudioElement>node);
+
+          player.init();
         }
       });
     });
