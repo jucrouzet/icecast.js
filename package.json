@@ -1,6 +1,6 @@
 {
   "name": "icecast.js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Pure JavaScript Icecast-based Webradio player.",
   "main": "./dist/icecast.js",
   "types": "dist/definition/index.d.ts",
