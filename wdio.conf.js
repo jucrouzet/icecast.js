@@ -108,8 +108,15 @@ const config = {
    * @param {Array.<Object>} capabilities list of capabilities details
    */
   onPrepare: function (config, capabilities) {
-    console.log('Emptying coverage directory');
-    rimraf.sync(path.resolve(__dirname, 'coverage', '**/*'));
+    const coverageDir = path.resolve(__dirname, 'coverage');
+
+    if (fs.existsSync(coverageDir)) {
+      console.log('Emptying coverage directory');
+      rimraf.sync(path.resolve(coverageDir, '**/*'));
+    } else {
+      console.log('Creating coverage directory');
+      fs.mkdirSync(coverageDir);
+    }
   },
   /**
    * Gets executed just before initialising the webdriver session and test framework. It allows you

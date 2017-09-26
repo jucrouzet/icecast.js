@@ -10,3 +10,6 @@ cache:
 
 script:
   - yarn run test-remote
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
