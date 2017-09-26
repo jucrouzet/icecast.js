@@ -163,6 +163,7 @@ const config = {
           'coverage',
           file.replace(/\W+/,'_'),
           Math.ceil(Math.random() * 1000000),
+          'partial',
           'json'
         ].join('.');
         fs.writeFile(

@@ -13,7 +13,7 @@
     "dist-min": "NODE_ENV=production webpack --config ./webpack/lib.js",
     "watch": "NODE_ENV=watch webpack-dev-server --config ./webpack/lib.js --content-base ./dist --inline --hot",
     "test-local": "xvfb-run --server-args=\"-screen 0, 1366x768x24\" wdio",
-    "test-remote": "BROWSERSTACK=true wdio && istanbul report json && remap-istanbul -i coverage/coverage-final.json  -t json -o coverage/coverage-remapped.json && mv coverage/coverage-remapped.json coverage/coverage-final.json && remap-istanbul -i coverage/coverage-final.json  -t html -o coverage"
+    "test-remote": "BROWSERSTACK=true wdio && istanbul report json && remap-istanbul -i coverage/coverage-final.json  -t json -o coverage/coverage-remapped.json && mv coverage/coverage-remapped.json coverage/coverage-final.json && rm -f coverage/*.partial.json"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
