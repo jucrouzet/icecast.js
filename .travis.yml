@@ -8,8 +8,5 @@ node_js:
 cache:
   yarn: true
 
-script:
-  - yarn run test-remote
-
 after_success:
   - bash <(curl -s https://codecov.io/bash)

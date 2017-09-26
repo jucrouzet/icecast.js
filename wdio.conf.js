@@ -1,6 +1,11 @@
 const fs = require('fs');
+const glob = require('glob');
 const path = require('path');
+const istanbul = require('istanbul');
+const remapIstanbul = require('remap-istanbul');
 const rimraf = require('rimraf');
+
+const coverageDir = path.resolve(__dirname, 'coverage');
 
 const wsCapabilities = desiredCapabilities => Object.assign(desiredCapabilities, {
   'browserstack.networkLogs': true,
@@ -16,8 +21,8 @@ const config = {
   webpackLogs: (typeof process.env.DEBUG_TESTING === 'string'),
 
   staticServerFolders: [
-    { mount: '/', path: path.resolve(__dirname, 'test', 'static') },
-    { mount: '/lib', path: path.resolve(__dirname, 'dist') },
+    {mount: '/', path: path.resolve(__dirname, 'test', 'static')},
+    {mount: '/lib', path: path.resolve(__dirname, 'dist')},
   ],
 
   specs: [
@@ -61,14 +66,14 @@ const config = {
       platform: 'WINDOWS',
     }),
     /**
-    // Latest ffox
-    wsCapabilities({
+     // Latest ffox
+     wsCapabilities({
       browserName: 'firefox',
       version: '55',
       platform: 'WIN8',
     }),
-    // Oldest compatible firefox
-    wsCapabilities({
+     // Oldest compatible firefox
+     wsCapabilities({
       browserName: 'firefox',
       version: '42',
       platform: 'MAC',
@@ -76,8 +81,8 @@ const config = {
      */
     /**
      * RealMobile <=> Local => Boom
-    // Chrome android
-    wsCapabilities({
+     // Chrome android
+     wsCapabilities({
       browserName: 'ANDROID',
       realMobile: true,
     }),
@@ -108,8 +113,6 @@ const config = {
    * @param {Array.<Object>} capabilities list of capabilities details
    */
   onPrepare: function (config, capabilities) {
-    const coverageDir = path.resolve(__dirname, 'coverage');
-
     if (fs.existsSync(coverageDir)) {
       console.log('Emptying coverage directory');
       rimraf.sync(path.resolve(coverageDir, '**/*'));
@@ -152,7 +155,7 @@ const config = {
         Object.keys(coverage).forEach((file) => {
           if (
             (file.indexOf(srcDir) !== 0) ||
-              // Coverage fails on file loaded as workers...
+            // Coverage fails on file loaded as workers...
             (file.match(/\/workers\//))
           ) {
             delete coverage[file];
@@ -161,7 +164,7 @@ const config = {
 
         const filename = [
           'coverage',
-          file.replace(/\W+/,'_'),
+          file.replace(/\W+/, '_'),
           Math.ceil(Math.random() * 1000000),
           'partial',
           'json'
@@ -254,7 +257,52 @@ const config = {
    * @param {Object} config wdio configuration object
    * @param {Array.<Object>} capabilities list of capabilities details
    */
-  onComplete: function (exitCode, config, capabilities) {
+  onComplete: (exitCode, config, capabilities) => {
+    if (exitCode !== 0) {
+      return;
+    }
+    const collector = new istanbul.Collector();
+    const reporter = new istanbul.Reporter();
+
+    console.log('Aggregating coverage files');
+    const origFiles = glob.sync(
+      '*.partial.json',
+      {
+        cwd: coverageDir,
+        root: '/',
+      }
+    );
+
+    origFiles.forEach(file => collector.add(
+      JSON.parse(
+        fs.readFileSync(
+          path.resolve(coverageDir, file),
+          'utf8',
+        )
+      )
+    ));
+    reporter.add('json');
+    reporter.write(collector, true, () => {
+      console.log('Renaming aggregated coverage file');
+      fs.rename(
+        path.resolve(coverageDir, 'coverage-final.json'),
+        path.resolve(coverageDir, 'coverage-before-remap.json')
+      );
+      console.log('Remapping aggregated coverage file');
+      remapIstanbul(
+        path.resolve(coverageDir, 'coverage-before-remap.json'),
+        {
+          json: path.resolve(coverageDir, 'coverage-final.json'),
+          html: coverageDir,
+        },
+      )
+        .then(() => {
+          console.log('Cleaning coverage files');
+          origFiles.forEach(file => fs.unlinkSync(path.resolve(coverageDir, file)));
+          fs.unlinkSync(path.resolve(coverageDir, 'coverage-before-remap.json'));
+        })
+        .catch(console.warn.bind(null));
+    });
   },
 };
 
