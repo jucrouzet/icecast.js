@@ -12,7 +12,7 @@ const plugins = [
   }),
 ];
 
-let generatedFileSuffix = pjson.version;
+let generatedFileSuffix = '';
 
 if (process.env.NODE_ENV === 'production') {
   console.warn('Bundling in production mode');
